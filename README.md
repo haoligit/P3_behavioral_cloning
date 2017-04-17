@@ -1,4 +1,4 @@
-#**Project 3 Submission in CarND-Term1** 
+# **Project 3 Submission in CarND-Term1** 
 This repository contains project 3 submission in Self-Driving Car Nano-Degree, Term 1. The main task of this project is to build a CNN for driving behavioral cloning on Udacity simulator the files are listed below.
 ##### 1. Behavioral_cloning_report.md, project writeup 
 ##### 2. model.py, CNN model, data pre-processing & augmentation, model training
