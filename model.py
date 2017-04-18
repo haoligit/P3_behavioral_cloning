@@ -11,6 +11,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten, Convolution2D, Input, Lambda, SpatialDropout2D
 from keras.optimizers import SGD, Adam, RMSprop
 from keras.utils import np_utils
+from keras.callbacks import ModelCheckpoint
 import cv2
 
 # define batch size and epochs
@@ -158,19 +159,21 @@ def simplified_model():
     
     model.add(Convolution2D(64, 3, 3, border_mode="valid", subsample=(1,1), activation="elu"))
     model.add(MaxPooling2D((2, 2)))
-    model.add(Dropout(0.5))
+    # model.add(Dropout(0.5))
     model.add(Convolution2D(32, 3, 3, border_mode="valid", subsample=(1,1), activation="elu"))
     model.add(MaxPooling2D((2, 2)))
-    model.add(Dropout(0.5))
+    # model.add(Dropout(0.5))
     model.add(Convolution2D(16, 3, 3, border_mode="valid", subsample=(1,1), activation="elu"))
     model.add(MaxPooling2D((2, 2)))
-    model.add(Dropout(0.5))
+    # model.add(Dropout(0.5))
 
     model.add(Flatten())
     model.add(Dense(128, activation="elu"))
     model.add(Dropout(0.5))
     model.add(Dense(64, activation="elu"))
+    model.add(Dropout(0.5))
     model.add(Dense(16, activation="elu"))
+    model.add(Dropout(0.5))
     model.add(Dense(1))
     return model
 
@@ -180,6 +183,19 @@ model = simplified_model()
 model.summary()
 # compile and fit the model
 model.compile(loss='mse', optimizer='adam')
-history_obj = model.fit_generator(train_generator, samples_per_epoch=len(train_image_file), validation_data=valid_generator, nb_val_samples=len(valid_image_file), nb_epoch=EPOCHS)
-model.save('model.h5')
-print("My model saved!")
+# set checkpoint to save the best model
+checkpoint = ModelCheckpoint('model.h5', monitor='val_loss', verbose=1, save_best_only=True, save_weights_only=False, mode='min')
+history_obj = model.fit_generator(train_generator, samples_per_epoch=len(train_image_file), validation_data=valid_generator, nb_val_samples=len(valid_image_file), nb_epoch=EPOCHS, callbacks=[checkpoint])
+
+print(history_obj.history.keys())
+### plot the training and validation loss for each epoch
+plt.plot(history_obj.history['loss'])
+plt.plot(history_obj.history['val_loss'])
+plt.title('model mean squared error loss')
+plt.ylabel('mean squared error loss')
+plt.xlabel('epoch')
+plt.legend(['training set', 'validation set'], loc='upper right')
+plt.show()
+
+# model.save('model_test.h5')
+print("Best model was saved!")
